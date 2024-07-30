@@ -64,15 +64,13 @@ jobs:
       contents: write
 
 
-  - name: Restore cached build
-    uses: actions/cache@v3
-    with:
-      key: cached-build-${{github.sha}}
-      path: .
-
-    
-
     steps:
+
+    - name: Restore cached build
+      uses: actions/cache@v3
+      with:
+        key: cached-build-${{github.sha}}
+        path: .
 
     # The uses: keyword invokes a GitHub action:
     # https://github.com/marketplace/actions/checkout
