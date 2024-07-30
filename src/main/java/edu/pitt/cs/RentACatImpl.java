@@ -17,9 +17,20 @@ public class RentACatImpl implements RentACat {
 	 * @return true if cat exists and was rented out, false otherwise
 	 */
 
+	@Override
 	public boolean returnCat(int id) {
-		// TODO: Fill in
-		return false;
+		Cat cat = getCat(id);
+		if (cat != null && cat.getRented()) {
+			cat.returnCat();
+			System.out.println("Welcome back, " + cat.getName() + "!");
+			return true;
+		} else if (cat != null && !cat.getRented()) {
+			System.out.println(cat.getName() + " is already here!");
+			return false;
+		} else {
+			System.out.println("Invalid cat ID.");
+			return false;
+		}
 	}
 
 	/**
@@ -32,8 +43,20 @@ public class RentACatImpl implements RentACat {
 	 * @return true if cat exists and was not rented out, false otherwise
 	 */
 
+	@Override
 	public boolean rentCat(int id) {
-		// TODO: Fill in
+		Cat cat = getCat(id);
+		if (cat != null) {
+			if (!cat.getRented()) {
+				cat.rentCat();
+				System.out.println(cat.getName() + " has been rented.");
+				return true;
+			} else {
+				System.out.println("Sorry, " + cat.getName() + " is not here!");
+				return false;
+			}
+		}
+		System.out.println("Invalid cat ID.");
 		return false;
 	}
 
@@ -46,8 +69,13 @@ public class RentACatImpl implements RentACat {
 	 * @return true if cat exists, false otherwise
 	 */
 
+	@Override
 	public boolean renameCat(int id, String name) {
-		// TODO: Fill in
+		Cat cat = getCat(id);
+		if (cat != null) {
+			cat.renameCat(name);
+			return true;
+		}
 		return false;
 	}
 
@@ -62,8 +90,19 @@ public class RentACatImpl implements RentACat {
 	 */
 
 	public String listCats() {
-		// TODO: Fill in
-		return "WRITE CODE FOR THIS";
+		StringBuilder sb = new StringBuilder();
+
+		if (cats.isEmpty()) {
+			return (""); // Return an empty string or some indication of no cats
+		} else {
+			for (Cat cat : cats) {
+				if (!cat.getRented()) {
+					sb.append("ID ").append(cat.getId()).append(". ").append(cat.getName()).append("\n");
+				}
+			}
+		}
+
+		return sb.toString();
 	}
 
 	/**
@@ -74,45 +113,27 @@ public class RentACatImpl implements RentACat {
 	 * @return Cat searched for if exists, null otherwise
 	 */
 
-	private Cat getCat(int id) {
-
-		// null check
+	public Cat getCat(int id) {
 		if (cats == null) {
+			System.out.println("Invalid cat ID.");
 			return null;
 		}
 
-		// Loop through every cat in the cat list
 		for (Cat c : cats) {
-			// If we found a cat whose id matches the id
-			// of the argument, then we have a match and
-			// can thus return a reference to that cat
 			if (c.getId() == id) {
 				return c;
 			}
 		}
-		// If we get all the way through the list and did
-		// not find a cat whose ID matches the passed-in
-		// ID, then the cat is not in the list
+
 		System.out.println("Invalid cat ID.");
 		return null;
-
 	}
 
-	/**
-	 * Add a cat to the list of cats.
-	 * 
-	 * @param c the Cat to add
-	 */
-
+	@Override
 	public void addCat(Cat c) {
 		cats.add(c);
 	}
 
-	/**
-	 * Main method
-	 * 
-	 * @param args - IGNORED, kept for compatibility
-	 */
 	public static void main(String[] args) {
 		RentACat rc = new RentACatImpl();
 
@@ -138,6 +159,14 @@ public class RentACatImpl implements RentACat {
 						System.out.print("Rent which cat? > ");
 						try {
 							int catIdToRent = sc.nextInt();
+							if (rc.rentCat(catIdToRent)) {
+								System.out.println("Cat was rented!");
+
+							}
+
+							else {
+								System.out.println("Failed to rent cat");
+							}
 							rc.rentCat(catIdToRent);
 						} catch (Exception ex) {
 							System.out.println("Invalid cat ID.");
@@ -149,27 +178,40 @@ public class RentACatImpl implements RentACat {
 						System.out.print("Return which cat? > ");
 						try {
 							int catIdToReturn = sc.nextInt();
-							rc.returnCat(catIdToReturn);
+							if (rc.returnCat(catIdToReturn)) {
+								// Retrieve the cat using the getCat method from RentACatImpl
+								Cat returnedCat = ((RentACatImpl) rc).getCat(catIdToReturn);
+								if (returnedCat != null) {
+									System.out.println("Welcome back, " + returnedCat.getName() + "!");
+								} else {
+									System.out.println("Failed to return cat. Check cat ID.");
+								}
+							} else {
+								System.out.println("Failed to return cat. Check cat ID.");
+							}
 						} catch (Exception ex) {
 							System.out.println("Invalid cat ID.");
-							sc.next();
-							break;
+							sc.next(); // Clear the invalid input
 						}
 						break;
 					case 4:
 						System.out.print("Rename which cat? > ");
 						try {
 							int catIdToRename = sc.nextInt();
-							sc.nextLine(); // to flush the previous line
+							sc.nextLine(); // Consume newline left-over
 							System.out.print("What is the new name? > ");
 							String newName = sc.nextLine();
-							rc.renameCat(catIdToRename, newName);
+							if (rc.renameCat(catIdToRename, newName)) {
+								System.out.println("Cat renamed successfully!");
+							} else {
+								System.out.println("Failed to rename cat. Check cat ID.");
+							}
 						} catch (Exception ex) {
 							System.out.println("Invalid cat ID.");
-							sc.next();
-							break;
+							sc.next(); // Clear the invalid input
 						}
 						break;
+
 					case 5:
 						keepGoing = false;
 						break;
@@ -183,7 +225,6 @@ public class RentACatImpl implements RentACat {
 				System.err.println("3. Return a cat from a customer");
 				System.err.println("4. Rename a cat");
 				System.err.println("5. Quit");
-				// Clear out the non-int in the scanner
 				sc.next();
 			}
 		}
