@@ -51,9 +51,14 @@ jobs:
     runs-on: ubuntu-latest
 
     permissions:
-      contents: read
+      contents: write
 
     steps:
+
+    # The uses: keyword invokes a GitHub action:
+    # https://github.com/marketplace/actions/checkout
+    - name: Checkout repository
+      uses: actions/checkout@v3
 
     # https://github.com/marketplace/actions/maven-dependency-tree-dependency-submission
     - name: Update dependency graph
